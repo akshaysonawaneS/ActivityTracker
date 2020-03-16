@@ -4,33 +4,27 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AppOpsManager;
-import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.WebHistoryItem;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private ArrayList<String> pkgArrayList;
     private ArrayList<String> timeArrayList;
+    private ArrayList<String> dateArrayList;
+    private ArrayList<Drawable> iconArrayList;
+    private String appName;
+    private Drawable icon;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -68,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
         mUageStatsManager = (UsageStatsManager) getApplicationContext().getSystemService(Context.USAGE_STATS_SERVICE);
 
         Calendar calendar = Calendar.getInstance();
-
+        calendar.set(Calendar.HOUR_OF_DAY,0);
         calendar.set(Calendar.MINUTE,0);
         calendar.set(Calendar.SECOND,0);
-        calendar.set(Calendar.HOUR,0);
+
         long startTime = calendar.getTimeInMillis();
         long endTime = System.currentTimeMillis();
 
@@ -79,24 +77,65 @@ public class MainActivity extends AppCompatActivity {
         Log.e("DATE", "Range end:" + dateFormat.format(endTime));
 
 
-        lUsageStatsMap = mUageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,startTime,endTime);
+        lUsageStatsMap = mUageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_MONTHLY, startTime,endTime);
 
         pkgArrayList = new ArrayList<String>();
         timeArrayList = new ArrayList<String>();
+        dateArrayList = new ArrayList<String>();
+        iconArrayList = new ArrayList<Drawable>();
+
         for(UsageStats usageStats: lUsageStatsMap)
         {
             long tt = usageStats.getTotalTimeInForeground();
-            tt = tt / 60000;
-            pkgArrayList.add(usageStats.getPackageName().toString());
-            Log.e("PackageName  "+ usageStats.getPackageName().toString(),String.valueOf(tt));
-            Log.e("TimeStamp: "+usageStats.getPackageName(),getDate(usageStats.getLastTimeUsed()));
+            if(tt>0){
+                pkgArrayList.add(getAppName(usageStats.getPackageName()));
+                timeArrayList.add(String.valueOf(tt/60000));
+                dateArrayList.add(getDate(usageStats.getLastTimeUsed()));
+                try {
+                    icon = getApplicationContext().getPackageManager().getApplicationIcon(getAppName(usageStats.getPackageName()));
+                    Log.e("Icon",icon.toString());
+                    iconArrayList.add(icon);
+                }
+                catch (PackageManager.NameNotFoundException e){
+                    e.printStackTrace();
+                }
+
+            }
+            Log.e("Name: "+usageStats.getPackageName(),String.valueOf(tt));
+
+
         }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,R.layout.app_list_view,R.id.element,pkgArrayList);
-        listView.setAdapter(arrayAdapter);
+
+        CustomListAdapter customListAdapter = new CustomListAdapter(this,pkgArrayList,dateArrayList,timeArrayList,iconArrayList);
+        listView.setAdapter(customListAdapter);
     }
+
+    public String getAppName(String pkgName)
+    {
+        try{
+            PackageManager packageManager = getApplicationContext().getPackageManager();
+            ApplicationInfo info = packageManager.getApplicationInfo(pkgName,packageManager.GET_META_DATA);
+            appName = (String)packageManager.getApplicationLabel(info);
+            return appName;
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "";
+
+        }
+    }
+
 
     public String getDate(long timeStamp)
     {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY,0);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        if(calendar.getTimeInMillis() > timeStamp)
+        {
+            return "Not Used Today";
+        }
         String dateString = dateFormat.format(new Date(timeStamp));
         return dateString;
     }
