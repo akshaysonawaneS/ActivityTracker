@@ -16,7 +16,7 @@ public class CustomListAdapter extends ArrayAdapter {
     private  ArrayList<String> appName;
     private  ArrayList<String> lastTime;
     private  ArrayList<String> totalTime;
-    private ArrayList<Drawable> icon;
+    private final ArrayList<Drawable> icon;
     private  Activity context;
 
     public CustomListAdapter(Activity context, ArrayList<String> appName, ArrayList<String> lastTime, ArrayList<String> totalTime, ArrayList<Drawable> icon) {

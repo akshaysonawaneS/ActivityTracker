@@ -15,16 +15,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> dateArrayList;
     private ArrayList<Drawable> iconArrayList;
     private String appName;
-    private Drawable icon;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -63,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkusagestart()
     {
+
         mUageStatsManager = (UsageStatsManager) getApplicationContext().getSystemService(Context.USAGE_STATS_SERVICE);
 
         Calendar calendar = Calendar.getInstance();
@@ -72,12 +70,13 @@ public class MainActivity extends AppCompatActivity {
 
         long startTime = calendar.getTimeInMillis();
         long endTime = System.currentTimeMillis();
-
         Log.e("DATE", "Range start:" + dateFormat.format(startTime) );
         Log.e("DATE", "Range end:" + dateFormat.format(endTime));
 
 
         lUsageStatsMap = mUageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_MONTHLY, startTime,endTime);
+        Collections.sort(lUsageStatsMap,new SoartedList());
+        Collections.reverse(lUsageStatsMap);
 
         pkgArrayList = new ArrayList<String>();
         timeArrayList = new ArrayList<String>();
@@ -87,13 +86,12 @@ public class MainActivity extends AppCompatActivity {
         for(UsageStats usageStats: lUsageStatsMap)
         {
             long tt = usageStats.getTotalTimeInForeground();
-            if(tt>0){
+            if( tt > 0 && getAppName(usageStats.getPackageName()) != ""){
                 pkgArrayList.add(getAppName(usageStats.getPackageName()));
                 timeArrayList.add(String.valueOf(tt/60000));
                 dateArrayList.add(getDate(usageStats.getLastTimeUsed()));
                 try {
-                    icon = getApplicationContext().getPackageManager().getApplicationIcon(getAppName(usageStats.getPackageName()));
-                    Log.e("Icon",icon.toString());
+                    Drawable icon = getApplicationContext().getPackageManager().getApplicationIcon(usageStats.getPackageName());
                     iconArrayList.add(icon);
                 }
                 catch (PackageManager.NameNotFoundException e){
@@ -102,10 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
             Log.e("Name: "+usageStats.getPackageName(),String.valueOf(tt));
-
-
         }
 
+        Log.e("iconlist",iconArrayList.toString());
         CustomListAdapter customListAdapter = new CustomListAdapter(this,pkgArrayList,dateArrayList,timeArrayList,iconArrayList);
         listView.setAdapter(customListAdapter);
     }
@@ -140,8 +137,9 @@ public class MainActivity extends AppCompatActivity {
         return dateString;
     }
 
-
 }
+
+
 
 
 
