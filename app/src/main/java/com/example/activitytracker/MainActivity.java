@@ -2,6 +2,7 @@ package com.example.activitytracker;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
@@ -15,12 +16,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> timeArrayList;
     private ArrayList<String> dateArrayList;
     private ArrayList<Drawable> iconArrayList;
+    private ArrayList<UsageStats> newUsageStats;
     private String appName;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -43,10 +46,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         listView = (ListView)findViewById(R.id.appList) ;
 
+
         AppOpsManager appOps = (AppOpsManager)getSystemService(Context.APP_OPS_SERVICE);
         int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,android.os.Process.myUid(),getPackageName());
-
-
 
         if(mode == AppOpsManager.MODE_ALLOWED){
             Log.e("Permission","Granted");
@@ -54,19 +56,18 @@ public class MainActivity extends AppCompatActivity {
         else {
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
         }
-        checkusagestart();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        checkusagestart(calendar);
 
     }
 
-    public void checkusagestart()
+    public void checkusagestart(Calendar calendar)
     {
 
         mUageStatsManager = (UsageStatsManager) getApplicationContext().getSystemService(Context.USAGE_STATS_SERVICE);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY,0);
-        calendar.set(Calendar.MINUTE,0);
-        calendar.set(Calendar.SECOND,0);
 
         long startTime = calendar.getTimeInMillis();
         long endTime = System.currentTimeMillis();
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         Log.e("DATE", "Range end:" + dateFormat.format(endTime));
 
 
-        lUsageStatsMap = mUageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_MONTHLY, startTime,endTime);
+        lUsageStatsMap = mUageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime,endTime);
         Collections.sort(lUsageStatsMap,new SoartedList());
         Collections.reverse(lUsageStatsMap);
 
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         timeArrayList = new ArrayList<String>();
         dateArrayList = new ArrayList<String>();
         iconArrayList = new ArrayList<Drawable>();
+        newUsageStats = new ArrayList<UsageStats>();
 
         for(UsageStats usageStats: lUsageStatsMap)
         {
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 pkgArrayList.add(getAppName(usageStats.getPackageName()));
                 timeArrayList.add(String.valueOf(tt/60000));
                 dateArrayList.add(getDate(usageStats.getLastTimeUsed()));
+                newUsageStats.add(usageStats);
                 try {
                     Drawable icon = getApplicationContext().getPackageManager().getApplicationIcon(usageStats.getPackageName());
                     iconArrayList.add(icon);
@@ -99,12 +102,25 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
+
             Log.e("Name: "+usageStats.getPackageName(),String.valueOf(tt));
         }
 
         Log.e("iconlist",iconArrayList.toString());
         CustomListAdapter customListAdapter = new CustomListAdapter(this,pkgArrayList,dateArrayList,timeArrayList,iconArrayList);
         listView.setAdapter(customListAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, DetailOfApp.class);
+                intent.putExtra("pkgId", newUsageStats.get(position));
+                startActivity(intent);
+            }
+        });
+
+
+
     }
 
     public String getAppName(String pkgName)

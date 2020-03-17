@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+
 import java.util.ArrayList;
 
 public class CustomListAdapter extends ArrayAdapter {
@@ -42,6 +44,10 @@ public class CustomListAdapter extends ArrayAdapter {
         lasttime.setText(lastTime.get(position));
         totaltime.setText(totalTime.get(position));
         iconapp.setBackground(icon.get(position));
+
+        CardView cardView = (CardView)rowView.findViewById(R.id.mainCard);
+        cardView.setCardElevation(13);
+        cardView.setRadius(25);
 
         return rowView;
     }
