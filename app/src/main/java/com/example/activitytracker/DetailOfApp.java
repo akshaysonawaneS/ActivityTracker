@@ -17,10 +17,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import pl.pawelkleczkowski.customgauge.CustomGauge;
+
 
 public class DetailOfApp extends AppCompatActivity {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,36 +30,46 @@ public class DetailOfApp extends AppCompatActivity {
         setContentView(R.layout.activity_detail_of_app2);
 
         UsageStats pkgId = getIntent().getParcelableExtra("pkgId");
+        long time1 = getIntent().getLongExtra("time",0);
 
         TextView textView = (TextView)findViewById(R.id.disname);
         CardView cardView = (CardView)findViewById(R.id.cardview);
         TextView dateandtime = (TextView)findViewById(R.id.lastTime);
         TextView usagetoday = (TextView)findViewById(R.id.usage);
         dateandtime.setText(getDate(pkgId.getLastTimeStamp()));
-
+        CustomGauge customGauge =(CustomGauge)findViewById(R.id.gauge1);
+        TextView button1 =(TextView)findViewById(R.id.button);
         cardView.setCardElevation(20);
         cardView.setRadius(20);
+
         textView.setText(getAppName(pkgId.getPackageName()));
-        setUsage(usagetoday,pkgId);
+        setUsage(usagetoday,pkgId,customGauge,button1,time1);
 
     }
 
-    public void setUsage(TextView usage, UsageStats pkgId)
+    public void setUsage(TextView usage, UsageStats pkgId, CustomGauge customGauge, TextView button1,long time1)
     {
-        long tt = pkgId.getTotalTimeInForeground();
-        tt = tt/60000;
-        if(tt < 60)
+
+        if(time1 < 60)
         {
             usage.setText("Low");
         }
-        else if (tt > 60 && tt < 120)
+        else if (time1 > 60 && time1 < 120)
         {
             usage.setText("Moderate");
+            Toast.makeText(getApplicationContext(),"Can do better,Try reading books",Toast.LENGTH_SHORT).show();
         }
         else {
             usage.setText("High");
-            Toast.makeText(getApplicationContext(),"Try to use this app less",Toast.LENGTH_SHORT);
+            Toast.makeText(getApplicationContext(),"Try to use this app less",Toast.LENGTH_SHORT).show();
         }
+        if((int)time1 <= 180) {
+            customGauge.setValue((int) time1);
+        }
+        else {
+            customGauge.setValue(180);
+        }
+        button1.setText(String.valueOf(time1));
     }
 
     public String getAppName(String pkgName)

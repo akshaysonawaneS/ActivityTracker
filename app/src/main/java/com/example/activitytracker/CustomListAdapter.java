@@ -17,11 +17,11 @@ public class CustomListAdapter extends ArrayAdapter {
 
     private  ArrayList<String> appName;
     private  ArrayList<String> lastTime;
-    private  ArrayList<String> totalTime;
+    private  ArrayList<Long> totalTime;
     private final ArrayList<Drawable> icon;
     private  Activity context;
 
-    public CustomListAdapter(Activity context, ArrayList<String> appName, ArrayList<String> lastTime, ArrayList<String> totalTime, ArrayList<Drawable> icon) {
+    public CustomListAdapter(Activity context, ArrayList<String> appName, ArrayList<String> lastTime, ArrayList<Long> totalTime, ArrayList<Drawable> icon) {
         super(context,R.layout.app_list_view,appName);
 
         this.context = context;
@@ -42,7 +42,7 @@ public class CustomListAdapter extends ArrayAdapter {
 
         name.setText(appName.get(position));
         lasttime.setText(lastTime.get(position));
-        totaltime.setText(totalTime.get(position));
+        totaltime.setText(String.valueOf(totalTime.get(position)));
         iconapp.setBackground(icon.get(position));
 
         CardView cardView = (CardView)rowView.findViewById(R.id.mainCard);

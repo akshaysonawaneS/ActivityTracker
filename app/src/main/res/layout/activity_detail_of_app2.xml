@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".DetailOfApp">
 
     <androidx.cardview.widget.CardView
@@ -11,6 +12,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
+        app:cardBackgroundColor="#1574f6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -28,15 +30,16 @@
                 android:textStyle="italic"
                 android:fontFamily="sans-serif-condensed-medium"
                 android:layout_gravity="center"
-                android:textColor="#000"/>
+                android:textColor="#fff"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="9dp"
                 android:text="Last Used Today"
-                android:textSize="19dp"
+                android:textSize="18dp"
                 android:textStyle="bold"
+                android:textColor="#fff"
                 android:fontFamily="sans-serif-medium"
                 />
 
@@ -51,6 +54,7 @@
                         android:layout_height="wrap_content"
                         android:text="Last Time Used: "
                         android:textSize="18dp"
+                        android:textColor="#fff"
                         android:fontFamily="monospace"
                         />
 
@@ -59,6 +63,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/lastTime"
                         android:textStyle="bold"
+                        android:textColor="#fff"
                         android:textSize="20dp"
                         />
                 </LinearLayout>
@@ -73,7 +78,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Usage: "
-                    android:textSize="18dp"
+                    android:textSize="16dp"
+                    android:textColor="#fff"
                     android:fontFamily="monospace"
                     />
 
@@ -82,7 +88,8 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/usage"
                     android:textStyle="bold"
-                    android:textSize="20dp"
+                    android:textColor="#fff"
+                    android:textSize="18dp"
                     />
             </LinearLayout>
 
@@ -90,6 +97,49 @@
 
     </androidx.cardview.widget.CardView>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
 
+        <TextView
+            android:id="@+id/button"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:background="@drawable/textshape"
+            android:textSize="30dp"
+            android:textColor="#fff"
+            android:gravity="center"
+            android:layout_marginTop="290dp"
+            android:layout_centerHorizontal="true"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Minutes"
+            android:textSize="22dp"
+            android:gravity="center"
+            android:layout_marginTop="210dp"
+            android:layout_centerHorizontal="true"
+            />
+
+        <pl.pawelkleczkowski.customgauge.CustomGauge
+            android:id="@+id/gauge1"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
+            app:gaugeEndValue="180"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="90dp"
+            app:gaugePointEndColor="#ff0000"
+            app:gaugePointStartColor="#00ff00"
+            app:gaugeStartAngle="135"
+            app:gaugeStartValue="0"
+            app:gaugeStrokeCap="BUTT"
+            app:gaugeStrokeColor="#a9a9a9"
+            app:gaugeStrokeWidth="20dp"
+            app:gaugeSweepAngle="270" />
+
+    </RelativeLayout>
 
 </LinearLayout>
